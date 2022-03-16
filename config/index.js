@@ -22,6 +22,24 @@ module.exports = (app) => {
   // In development environment the app logs
   app.use(logger("dev"));
 
+  const session = require("express-session");
+  const MongoStore = require("connect-mongo");
+
+  app.use(
+    session({
+      secret: process.env.SESSION_KEY,
+      saveUninitialized: false,
+      resave: false,
+      cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+      },
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || "mongodb://localhost/basic-auth",
+        ttl: 24 * 60 * 60,
+      }),
+    })
+  );
+
   // To have access to `body` property in the request
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
